@@ -1,0 +1,17 @@
+{
+    "name": "node-maildir",
+    "version": "0.0.1",
+    "description": "nodejs library for interacting with Maildir(++)",
+    "keywords": ["maildir", "mail", "email"],
+    "author": {
+        "name": "Chris Lee",
+        "email": "clee@mg8.org",
+        "url": "http://clee.github.com/"
+    },
+    "dependencies": {"mailparser": ">=0.2.20"},
+    "devDependencies": {"nodeunit": "*"},
+    "main": "index",
+    "homepage": "https://github.com/clee/node-maildir",
+    "repository": { "type" : "git", "url" : "https://github.com/clee/node-maildir.git" },
+    "engines": { "node": "0.6.x" }
+}
