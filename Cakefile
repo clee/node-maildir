@@ -5,9 +5,8 @@ util = require 'util'
 {exec} = require 'child_process'
 
 task 'test', 'run tests', () ->
-  async_testing = require 'async_testing'
-  async_testing.run('lib/test/tests.js', [])
-
+	{reporters} = require 'nodeunit'
+	reporters.default.run ['lib/test.js']
 
 task 'build', 'src/ --> lib/', () ->
   # .coffee --> .js
