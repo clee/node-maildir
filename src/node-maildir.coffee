@@ -14,7 +14,6 @@ class Maildir extends EventEmitter
 	constructor: (@maildir) ->
 		fs.readdir "#{@maildir}/cur", (err, files) =>
 			@files = files
-			@count = @files.length
 
 	# Kill the watcher, remove the listeners, end the world
 	shutdown: (callback) =>
@@ -47,25 +46,21 @@ class Maildir extends EventEmitter
 		origin = "#{@maildir}/new/#{path}"
 		destination = "#{@maildir}/cur/#{path}:2,"
 		fs.rename origin, destination, =>
-			@count++
-			mailparser = new MailParser()
-			mailparser.on "end", (message) =>
-				@emit "newMessage", message
-			fs.createReadStream(destination).pipe(mailparser)
+			fs.readdir "#{@maildir}/cur", (err, files) =>
+				@files = files
+				@loadMessage @files.length-1, (message) => @emit "newMessage", message
 
 	# what messages are new? let's tell anyone listening about them.
 	divine_new_messages: =>
-		fs.readdir "#{@maildir}/cur", (err, files) =>
-			_.difference(files, @files).forEach (file) =>
+		fs.readdir "#{@maildir}/new", (err, files) =>
+			files.forEach (file) =>
 				@notify_new_message(file)
-			@files = files
 
 	# Load a parsed message from the Maildir given an index, with a callback
 	loadMessage: (index, callback) =>
-		fs.readdir "#{@maildir}/cur", (err, files) =>
-			mailparser = new MailParser()
-			mailparser.on "end", (message) =>
-				callback message
-			fs.createReadStream(files[index]).pipe(mailparser)
+		mailparser = new MailParser()
+		mailparser.on "end", (message) =>
+			callback message
+		fs.createReadStream("#{@maildir}/cur/#{@files[index]}").pipe(mailparser)
 
 module.exports = Maildir
