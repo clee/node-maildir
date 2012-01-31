@@ -14,6 +14,7 @@ class Maildir extends EventEmitter
 	constructor: (@maildir) ->
 		fs.readdir "#{@maildir}/cur", (err, files) =>
 			@files = files
+			Object.defineProperty @, 'count', get: => @files.length
 
 	# Kill the watcher, remove the listeners, end the world
 	shutdown: (callback) =>
@@ -48,7 +49,7 @@ class Maildir extends EventEmitter
 		fs.rename origin, destination, =>
 			fs.readdir "#{@maildir}/cur", (err, files) =>
 				@files = files
-				@loadMessage @files.length-1, (message) => @emit "newMessage", message
+				@loadMessage @count-1, (message) => @emit "newMessage", message
 
 	# what messages are new? let's tell anyone listening about them.
 	divine_new_messages: =>
