@@ -17,10 +17,10 @@ class Maildir extends EventEmitter
 			@count = @files.length
 
 	# Kill the watcher, remove the listeners, end the world
-	shutdown: (cb) =>
+	shutdown: (callback) =>
 		@watcher?.close()
 		@removeAllListeners()
-		cb() if cb?
+		callback?()
 
 	# Notify the client about all the new messages that already exist
 	monitor: =>
