@@ -17,16 +17,15 @@ class Maildir extends EventEmitter
 			Object.defineProperty @, 'count', get: => @files.length
 
 	# Kill the watcher, remove the listeners, end the world
-	shutdown: (callback) =>
+	shutdown: (callback) ->
 		@watcher?.close()
 		@removeAllListeners()
 		callback?()
 
 	# Notify the client about all the new messages that already exist
-	monitor: =>
+	monitor: ->
 		fs.readdir "#{@maildir}/new", (err, files) =>
-			files.forEach (file) =>
-				@notify_new_message(file)
+			@notify_new_message(file) for file in files
 
 		# ... and set up a watcher on the filesystem so we can provide
 		# notifications for all further new messages from here on out
@@ -43,7 +42,7 @@ class Maildir extends EventEmitter
 				@divine_new_messages()
 
 	# emit the newMessage event for mail at a given fs path
-	notify_new_message: (path) =>
+	notify_new_message: (path) ->
 		origin = "#{@maildir}/new/#{path}"
 		destination = "#{@maildir}/cur/#{path}:2,"
 		fs.rename origin, destination, =>
@@ -52,13 +51,12 @@ class Maildir extends EventEmitter
 				@loadMessage @count-1, (message) => @emit "newMessage", message
 
 	# what messages are new? let's tell anyone listening about them.
-	divine_new_messages: =>
+	divine_new_messages: ->
 		fs.readdir "#{@maildir}/new", (err, files) =>
-			files.forEach (file) =>
-				@notify_new_message(file)
+			@notify_new_message(file) for file in files
 
 	# Load a parsed message from the Maildir given an index, with a callback
-	loadMessage: (index, callback) =>
+	loadMessage: (index, callback) ->
 		mailparser = new MailParser()
 		mailparser.on "end", (message) =>
 			callback message
