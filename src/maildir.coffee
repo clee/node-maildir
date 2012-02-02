@@ -4,7 +4,6 @@
 {EventEmitter} = require "events"
 {MailParser} = require "mailparser"
 fs = require "fs"
-_ = require "underscore"
 
 exports.version = "0.0.1"
 
