@@ -5,7 +5,7 @@
 {MailParser} = require "mailparser"
 fs = require "fs"
 
-exports.version = "0.0.1"
+exports.version = "0.4.0"
 
 class Maildir extends EventEmitter
 	# Create a new Maildir object given a path to the root of the Maildir

@@ -1,5 +1,4 @@
 
-0.0.1 / 2010-01-03
+0.4.0 / 2010-02-01
 ==================
-
-  * Initial release
+  * Initial public release: fetching messages, async notification of new messages implemented
