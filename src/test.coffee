@@ -1,6 +1,6 @@
 #!/usr/bin/env coffee
 
-Maildir = require '../lib/node-maildir'
+Maildir = require '../lib/maildir'
 {testCase} = require 'nodeunit'
 fs = require 'fs'
 
@@ -44,5 +44,5 @@ module.exports = {
 		maildir.on "newMessage", messageListener
 		maildir.monitor()
 		sampleText = "Subject: ABCDEF\r\n" + "X-Test: =?UTF-8?Q?=C3=95=C3=84?= =?UTF-8?Q?=C3=96=C3=9C?=\r\n\r\nbody here"
-		fs.writeFileSync "./test/maildir/new/#{Date.now()}.hack", sampleText
+		setTimeout (fs.writeFileSync "./test/maildir/new/#{Date.now()}.hack", sampleText), 1000
 }

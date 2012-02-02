@@ -1,1 +1,1 @@
-module.exports = require('./lib/node-maildir');
+module.exports = require('./lib/maildir');

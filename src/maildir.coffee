@@ -1,5 +1,4 @@
-# node-maildir
-# Copyright(c) 2012 Chris Lee <clee@mg8.org>
+# Copyright (c) 2012 Chris Lee <clee@mg8.org>
 # MIT Licensed
 
 {EventEmitter} = require "events"
@@ -24,21 +23,16 @@ class Maildir extends EventEmitter
 
 	# Notify the client about all the new messages that already exist
 	monitor: ->
-		fs.readdir "#{@maildir}/new", (err, files) =>
-			@notify_new_message(file) for file in files
+		@divine_new_messages()
 
 		# ... and set up a watcher on the filesystem so we can provide
 		# notifications for all further new messages from here on out
 		@watcher = fs.watch "#{@maildir}/new/", (event, path) =>
-			if event is not "change" or not path?
-				console.log "bullshit detected: #{event}: #{path}"
-				return
-
+			# on Linux, we *should* get a path with the name of the new file
 			if path?
-				# on Linux, we *should* get a path with the name of the new file
 				@notify_new_message(path)
+			# everywhere else sucks. thanks for nothing, kqueue.
 			else
-				# everywhere else sucks. thanks for nothing, kqueue.
 				@divine_new_messages()
 
 	# emit the newMessage event for mail at a given fs path

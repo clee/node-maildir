@@ -1,5 +1,5 @@
 {
-    "name": "node-maildir",
+    "name": "maildir",
     "version": "0.0.1",
     "description": "nodejs library for interacting with Maildir(++)",
     "keywords": ["maildir", "mail", "email"],
