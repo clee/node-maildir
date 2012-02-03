@@ -1,6 +1,6 @@
 {
     "name": "maildir",
-    "version": "0.4.0",
+    "version": "0.5.0",
     "description": "nodejs library for interacting with Maildir(++)",
     "keywords": ["maildir", "mail", "email"],
     "author": {
@@ -8,10 +8,10 @@
         "email": "clee@mg8.org",
         "url": "http://clee.github.com/"
     },
-    "dependencies": {"mailparser": ">=0.2.20"},
+    "dependencies": {"mailparser": ">=0.2.20", "inotify": ">=0.2.2"},
     "devDependencies": {"nodeunit": "*"},
     "main": "index",
-    "homepage": "https://github.com/clee/node-maildir",
+    "homepage": "http://clee.github.com/node-maildir",
     "repository": { "type" : "git", "url" : "https://github.com/clee/node-maildir.git" },
     "engines": { "node": "0.6.x" }
 }

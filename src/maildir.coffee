@@ -7,7 +7,7 @@
 fs = require "fs"
 os = require "os"
 
-exports.version = "0.4.0"
+exports.version = "0.5.0"
 
 class Maildir extends EventEmitter
 	# Create a new Maildir object given a path to the root of the Maildir
