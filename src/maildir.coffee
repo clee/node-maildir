@@ -3,56 +3,62 @@
 
 {EventEmitter} = require "events"
 {MailParser} = require "mailparser"
+{Inotify} = require "inotify"
 fs = require "fs"
+os = require "os"
 
 exports.version = "0.4.0"
 
 class Maildir extends EventEmitter
 	# Create a new Maildir object given a path to the root of the Maildir
 	constructor: (@maildir) ->
-		fs.readdir "#{@maildir}/cur", (err, files) =>
-			@files = files
-			Object.defineProperty @, 'count', get: => @files.length
+		@files = fs.readdirSync "#{@maildir}/cur"
+		Object.defineProperty @, 'count', get: => @files.length
+		@inotify = if os.platform() is 'linux' then new Inotify(false) else null
 
-	# Kill the watcher, remove the listeners, end the world
+	# remove the listeners, kill inotify, end the world
 	shutdown: (callback) ->
-		@watcher?.close()
 		@removeAllListeners()
+		@inotify?.close()
 		callback?()
 
 	# Notify the client about all the new messages that already exist
 	monitor: ->
 		@divine_new_messages()
 
-		# ... and set up a watcher on the filesystem so we can provide
-		# notifications for all further new messages from here on out
-		@watcher = fs.watch "#{@maildir}/new/", (event, path) =>
-			# on Linux, we *should* get a path with the name of the new file
-			if path?
-				@notify_new_message(path)
-			# everywhere else sucks. thanks for nothing, kqueue.
-			else
-				@divine_new_messages()
+		# thanks for nothing, kqueue.
+		if os.platform() is not 'linux'
+			setInterval @divine_new_messages(), 5000
+			return
 
-	# emit the newMessage event for mail at a given fs path
+		# on Linux, we *should* get a notification whenever a file appears in `new/`
+		addOptions =
+			path: "#{@maildir}/new/"
+			watch_for: Inotify.IN_ONLYDIR | Inotify.IN_CREATE | Inotify.IN_MOVED_TO
+			callback: (event) =>
+				if (event.mask & Inotify.IN_CREATE) or (event.mask & Inotify.IN_MOVED_TO)
+					@notify_new_message event.name
+		@inotify.addWatch addOptions
+
+	# Emit the newMessage event for mail at a given fs path
 	notify_new_message: (path) ->
 		origin = "#{@maildir}/new/#{path}"
 		destination = "#{@maildir}/cur/#{path}:2,"
 		fs.rename origin, destination, =>
+			@loadMessage "#{path}:2,", (message) => @emit "newMessage", message
 			fs.readdir "#{@maildir}/cur", (err, files) =>
 				@files = files
-				@loadMessage @count-1, (message) => @emit "newMessage", message
 
-	# what messages are new? let's tell anyone listening about them.
+	# What messages are new? Let's tell anyone listening about them.
 	divine_new_messages: ->
 		fs.readdir "#{@maildir}/new", (err, files) =>
-			@notify_new_message(file) for file in files
+			@notify_new_message file for file in files
 
-	# Load a parsed message from the Maildir given an index, with a callback
-	loadMessage: (index, callback) ->
+	# Load a parsed message from the Maildir given a path, with a callback
+	loadMessage: (path, callback) ->
 		mailparser = new MailParser()
 		mailparser.on "end", (message) =>
 			callback message
-		fs.createReadStream("#{@maildir}/cur/#{@files[index]}").pipe(mailparser)
+		fs.createReadStream("#{@maildir}/cur/#{path}").pipe(mailparser)
 
 module.exports = Maildir

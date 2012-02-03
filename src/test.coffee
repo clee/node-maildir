@@ -4,13 +4,12 @@ Maildir = require '../lib/maildir'
 {testCase} = require 'nodeunit'
 fs = require 'fs'
 
-module.exports = {
+module.exports =
 	setUp: (callback) =>
 		fs.mkdir "./test/maildir", ->
 			fs.mkdir "./test/maildir/cur", ->
 				fs.mkdir "./test/maildir/new", ->
 					callback()
-
 	# Teardown doesn't seem to work correctly. TODO: Fix it later.
 	###
 	tearDown: (callback) =>
@@ -26,13 +25,11 @@ module.exports = {
 					console.log "removed maildir"
 					callback()
 	###
-
 	"Create empty maildir": (test) ->
 		test.expect 1
 		maildir = new Maildir "./test/maildir"
 		test.ok maildir != null, "The maildir should exist"
 		test.done()
-
 	"New message in maildir": (test) ->
 		test.expect 2
 		maildir = new Maildir "./test/maildir"
@@ -45,4 +42,9 @@ module.exports = {
 		maildir.monitor()
 		sampleText = "Subject: ABCDEF\r\n" + "X-Test: =?UTF-8?Q?=C3=95=C3=84?= =?UTF-8?Q?=C3=96=C3=9C?=\r\n\r\nbody here"
 		setTimeout (fs.writeFileSync "./test/maildir/new/#{Date.now()}.hack", sampleText), 1000
-}
+	"Load message 0": (test) ->
+		test.expect 1
+		maildir = new Maildir "./test/maildir"
+		maildir.loadMessage maildir.files[0], (m) ->
+			test.ok m?, "the message should exist"
+			test.done()
