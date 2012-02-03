@@ -48,3 +48,12 @@ module.exports =
 		maildir.loadMessage maildir.files[0], (m) ->
 			test.ok m?, "the message should exist"
 			test.done()
+	"Delete messsage 0": (test) ->
+		test.expect 1
+		maildir = new Maildir "./test/maildir"
+		pathToDelete = maildir.files[0]
+		maildir.on "deleteMessage", (pathDeleted) ->
+			test.equal pathToDelete, pathDeleted
+			test.done()
+		maildir.monitor()
+		fs.unlinkSync "./test/maildir/cur/#{pathToDelete}"

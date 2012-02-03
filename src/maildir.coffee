@@ -38,7 +38,14 @@ class Maildir extends EventEmitter
 			callback: (event) =>
 				if (event.mask & Inotify.IN_CREATE) or (event.mask & Inotify.IN_MOVED_TO)
 					@notify_new_message event.name
+		delOptions =
+			path: "#{@maildir}/cur/"
+			watch_for: Inotify.IN_ONLYDIR | Inotify.IN_DELETE
+			callback: (event) =>
+				if event.mask & Inotify.IN_DELETE
+					@notify_deleted_message event.name
 		@inotify.addWatch addOptions
+		@inotify.addWatch delOptions
 
 	# Emit the newMessage event for mail at a given fs path
 	notify_new_message: (path) ->
@@ -48,6 +55,12 @@ class Maildir extends EventEmitter
 			@loadMessage "#{path}:2,", (message) => @emit "newMessage", message
 			fs.readdir "#{@maildir}/cur", (err, files) =>
 				@files = files
+
+	# A message has been deleted! Let's tattle.
+	notify_deleted_message: (path) ->
+		fs.readdir "#{@maildir}/cur", (err, files) =>
+			@files = files
+			@emit 'deleteMessage', path
 
 	# What messages are new? Let's tell anyone listening about them.
 	divine_new_messages: ->
