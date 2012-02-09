@@ -71,6 +71,7 @@ class Maildir extends EventEmitter
 	loadMessage: (path, callback) ->
 		mailparser = new MailParser()
 		mailparser.on "end", (message) =>
+			message.path = path
 			callback message
 		fs.createReadStream("#{@maildir}/cur/#{path}").pipe(mailparser)
 
