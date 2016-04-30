@@ -51,10 +51,11 @@ class Maildir extends EventEmitter
 	notify_new_message: (path) ->
 		origin = "#{@maildir}/new/#{path}"
 		destination = "#{@maildir}/cur/#{path}:2,"
-		fs.rename origin, destination, =>
-			@loadMessage "#{path}:2,", (message) => @emit "newMessage", message
+		fs.rename origin, destination, (err) =>
 			fs.readdir "#{@maildir}/cur", (err, files) =>
 				@files = files
+				@loadMessage "#{path}:2,", (message) =>
+					@emit "newMessage", message
 
 	# A message has been deleted! Let's tattle.
 	notify_deleted_message: (path) ->
