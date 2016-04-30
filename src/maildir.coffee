@@ -52,20 +52,30 @@ class Maildir extends EventEmitter
 		origin = "#{@maildir}/new/#{path}"
 		destination = "#{@maildir}/cur/#{path}:2,"
 		fs.rename origin, destination, (err) =>
+			return if err
+
 			fs.readdir "#{@maildir}/cur", (err, files) =>
+				return if err
+
 				@files = files
-				@loadMessage "#{path}:2,", (message) =>
+				@loadMessage "#{path}:2,", (err, message) =>
+					return if err
+
 					@emit "newMessage", message
 
 	# A message has been deleted! Let's tattle.
 	notify_deleted_message: (path) ->
 		fs.readdir "#{@maildir}/cur", (err, files) =>
+			return if err
+
 			@files = files
 			@emit 'deleteMessage', path
 
 	# What messages are new? Let's tell anyone listening about them.
 	divine_new_messages: ->
 		fs.readdir "#{@maildir}/new", (err, files) =>
+			return if err
+
 			@notify_new_message file for file in files
 
 	# Load a parsed message from the Maildir given a path, with a callback
@@ -73,7 +83,10 @@ class Maildir extends EventEmitter
 		mailparser = new MailParser()
 		mailparser.on "end", (message) =>
 			message.path = path
-			callback message
-		fs.createReadStream("#{@maildir}/cur/#{path}").pipe(mailparser)
+			callback null, message
+		readStream = fs.createReadStream "#{@maildir}/cur/#{path}"
+		readStream.on "error", (err) =>
+			callback err
+		readStream.pipe(mailparser)
 
 module.exports = Maildir
