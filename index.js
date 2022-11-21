@@ -1,1 +1,1 @@
-module.exports = require('./lib/maildir');
+export * from "./lib/maildir";

@@ -6,7 +6,7 @@ a nodejs library for interacting with Maildir(++)
 
 (The MIT License)
 
-Copyright (c) 2012 Chris Lee &lt;clee@mg8.org&gt;
+Copyright (c) 2012-2022 Chris Lee &lt;clee@mg8.org&gt;
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
