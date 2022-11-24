@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+      "allowJs": true,
+      "esModuleInterop": true,
+      "module": "es2022",
+      "moduleResolution": "node",
+      "outDir": "./lib",
+      "target": "es2022",
+      "types": []
+    },
+    "include": ["./src/**/*"]
+}

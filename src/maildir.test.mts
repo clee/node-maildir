@@ -2,7 +2,9 @@ import Maildir from './maildir.mjs';
 
 import * as fs from 'node:fs/promises';
 
-let _maildir;
+import {beforeAll, afterAll, test, expect} from '@jest/globals';
+
+let _maildir: Maildir;
 
 beforeAll(async () => {
   let paths = ["./test/maildir/cur", "./test/maildir/new"]
@@ -47,16 +49,20 @@ test("Load message 0", async () => {
 
 test("Delete messsage 0", done => {
   const maildir = _maildir;
-  expect.assertions(1);
-  maildir.update_files().then(() => {
-    const pathToDelete = maildir.files[0];
+  expect.assertions(3);
+  const pathToDelete = maildir.files[0];
 
-    maildir.on("deleteMessage", function(pathDeleted) {
-      expect(pathToDelete).toContain(pathDeleted);
-      done();
-    });
-    maildir.monitor().then(() => {
-      fs.unlink(pathToDelete).then();
+  maildir.on("deleteMessage", (pathDeleted: string) => {
+    expect(pathToDelete).toContain(pathDeleted);
+    expect(pathToDelete in maildir.files).toBe(false);
+    done();
+  });
+  maildir.monitor().then(() => {
+    fs.unlink(pathToDelete).then(() => {
+      expect(fs.open(pathToDelete)).rejects.toMatchObject({
+        code: "ENOENT",
+        path: pathToDelete,
+      })
     });
   });
 });

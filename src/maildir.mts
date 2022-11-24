@@ -5,21 +5,23 @@ import { simpleParser } from 'mailparser';
 import * as chokidar from 'chokidar';
 
 class Maildir extends EventEmitter {
+  maildir: string;
+  files: string[] = [];
+  watchers: { [key: string]: chokidar.FSWatcher } = {};
+ 
   // Create a new Maildir object given a path to the root of the Maildir
   constructor(maildir) {
     super();
     this.maildir = maildir;
-    this.files = new Array();
-    this.watchers = {}
   }
 
-  get count() {
+  get count(): number {
     return this.files.length;
   }
 
   // remove the listeners, kill watcher, end the world
-  shutdown() {
-    return new Promise(async (resolve) => {
+  shutdown(): Promise<void> {
+    return new Promise<void>(async (resolve) => {
       let ref, key;
       this.removeAllListeners();
       for (key in this.watchers) {
@@ -33,7 +35,7 @@ class Maildir extends EventEmitter {
   }
 
   // Notify the client about all the new messages that already exist
-  async monitor() {
+  async monitor(): Promise<void> {
     await this.update_files();
     await this.divine_new_messages();
     // don't overwrite our existing watchers
@@ -50,10 +52,10 @@ class Maildir extends EventEmitter {
     this.watchers['cur'] = curWatcher;
   }
   
-  update_files() {
+  update_files(): Promise<string[]> {
     return new Promise(async (resolve, reject) => {
       try {
-        let files = [];
+        let files: string[] = [];
         let dir = await fs.opendir(`${this.maildir}/cur/`);
         for await (const file of dir) {
           files.push(`${this.maildir}/cur/${file.name}`);
@@ -67,16 +69,8 @@ class Maildir extends EventEmitter {
   }
 
   // Emit the newMessage event for mail at a given fs path
-  async notify_new_message(path) {
-    if (path === null || path === undefined) {
-      return;
-    }
-    var file;
-    if (typeof path == "Object" && 'name' in path) {
-      file = path.name;
-    } else {
-      file = path;
-    }
+  async notify_new_message(path: string) {
+    const file = path;
     const origin = `${this.maildir}/new/${file}`;
     const destination = `${this.maildir}/cur/${file}:2,`;
 
@@ -102,7 +96,7 @@ class Maildir extends EventEmitter {
   }
 
   // Load a parsed message from the Maildir given a path, with a callback
-  async loadMessage(path) {
+  async loadMessage(path: string) {
     const file = await fs.open(path);
     const readStream = file.createReadStream();
     
